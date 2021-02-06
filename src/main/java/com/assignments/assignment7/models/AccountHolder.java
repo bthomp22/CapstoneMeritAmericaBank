@@ -1,5 +1,6 @@
 package com.assignments.assignment7.models;
 
+import java.time.LocalDate;
 import java.util.*;
 
 import javax.persistence.CascadeType;
@@ -42,6 +43,8 @@ public class AccountHolder {
 	@NotNull(message = "SSN can not be null")
 	@NotBlank(message = "SSN can not be blank")
 	String SSN;
+	
+	LocalDate birthDate;
 	
 	@OneToOne(cascade = CascadeType.ALL, mappedBy = "accountHolder", fetch = FetchType.LAZY)
 	private RolloverIRA rollOverIRA;
@@ -92,27 +95,31 @@ public class AccountHolder {
 		this.user = user;
 	}
 
-	@JsonManagedReference
+	@JsonManagedReference(value="accountHolder")
 	public CheckingAccount getCheckingAccounts() {
 		return checkingAccounts;
 	}
 
+	@JsonManagedReference(value="accountHolder")
 	public RolloverIRA getRollOverIRA() {
 		return rollOverIRA;
 	}
-
+	
+	public void setRollOverIRA(RolloverIRA rollOverIRA) {
+		this.rollOverIRA = rollOverIRA;
+	}
+	
+	@JsonManagedReference(value="accountHolder")
 	public RothIRA getRothIRA() {
 		return rothIRA;
 	}
 
-	public void setRollOverIRA(RolloverIRA rollOverIRA) {
-		this.rollOverIRA = rollOverIRA;
-	}
-
+	@JsonManagedReference(value="accountHolder")
 	public IRA getIra() {
 		return ira;
 	}
 
+	@JsonManagedReference(value="accountHolder")
 	public List<DBAChecking> getDbaCheckings() {
 		return dbaCheckings;
 	}
@@ -129,20 +136,18 @@ public class AccountHolder {
 		this.rothIRA = rothIRA;
 	}
 
-
-
 	public void setCheckingAccounts(CheckingAccount checkingAccounts) {
 		this.checkingAccounts = checkingAccounts;
 	}
 
-	@JsonManagedReference
+	@JsonManagedReference(value="accountHolder")
 	public SavingsAccount getSavingsAccounts() {
 		return savingsAccounts;
 	}
 	public void setSavingsAccounts(SavingsAccount savingsAccounts) {
 		this.savingsAccounts = savingsAccounts;
 	}
-	@JsonManagedReference
+	@JsonManagedReference(value="accountHolder")
 	public List<CDAccount> getcDAccounts() {
 		return cDAccounts;
 	}
@@ -185,6 +190,14 @@ public class AccountHolder {
 		return this;
 	}
 
+	public LocalDate getBirthDate() {
+		return birthDate;
+	}
+
+	public void setBirthDate(LocalDate birthDate) {
+		this.birthDate = birthDate;
+	}
+
 	public double getCheckingBalance() {
 		double totalBalance = 0;
 		if (checkingAccounts != null) {
@@ -222,5 +235,19 @@ public class AccountHolder {
 	}
 	public double getCombinedBalance() {
 		return getCheckingBalance() + getSavingsBalance() + getCdbalance();
+	}
+	
+	public List<BankAccount> getAllAccounts(){
+		List<BankAccount> allAccount = new ArrayList<BankAccount>();
+		allAccount.add(getCheckingAccounts());
+		allAccount.add(getSavingsAccounts());
+		allAccount.add(getIra());
+		allAccount.add(getRothIRA());
+		allAccount.add(getRollOverIRA());
+		for(BankAccount ba : getcDAccounts())
+			allAccount.add(ba);
+		for(BankAccount ba : getDbaCheckings())
+			allAccount.add(ba);
+		return allAccount;
 	}
 }
