@@ -65,39 +65,26 @@ public class MeritBankController {
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	@Autowired
 	private MeritBankService meritBankService;
-	@Autowired
-	private AuthenticationManager authenticationManager;
-	@Autowired
-	private MyUserDetailsService myUserDetailsService;
-	@Autowired
-	private JwtUtil jwtTokenUtil;
+
 
 	//@PreAuthorize("hasAuthority('admin')")
-	@PostMapping("/authenticate/createUser")
+	@PostMapping("/authenticate/createUser") //CREATE A USER
 	@ApiOperation(value = "", authorizations = { @Authorization(value="jwtToken") })
 	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
 		return meritBankService.registerUser(signUpRequest);
 	}
 
-	@RequestMapping(value = "/authenticate", method = RequestMethod.POST)
+	@RequestMapping(value = "/authenticate", method = RequestMethod.POST)//AUTHENTICATE LOGIN
 	public ResponseEntity<?> createAutheticationToken(@RequestBody AuthenticationRequest authenticationRequest)
 			throws Exception {
-		try {
-			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-					authenticationRequest.getUserName(), authenticationRequest.getPassword()));
-		} catch (Exception e) {
-			// TODO: handle exception
-			throw new Exception("incorrect username or password", e);
-		}
-		final UserDetails userDetails = myUserDetailsService.loadUserByUsername(authenticationRequest.getUserName());
-		final String jwt = jwtTokenUtil.generateToken(userDetails);
-		return ResponseEntity.ok(new AuthenticationResponse(jwt));
+
+		return meritBankService.createAutheticationToken(authenticationRequest);
 
 	}
-
+// START ADMIN NO NEED TO WORK WE ARE NOT SHOWING ADMIN PAGE
 	@PreAuthorize("hasAuthority('admin')")
 	@ResponseStatus(HttpStatus.CREATED)
-	@PostMapping(value = "/AccountHolders")
+	@PostMapping(value = "/AccountHolders") 
 	public AccountHolder addAccountHolder(@Valid @RequestBody AccountHolder accountHolder)
 			throws AccountNotFoundException {
 		return meritBankService.addAccountHolder(accountHolder);
@@ -105,7 +92,7 @@ public class MeritBankController {
 
 	@PreAuthorize("hasAuthority('admin')")
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(value = "/AccountHolders")
+	@GetMapping(value = "/AccountHolders") 
 	public List<AccountHolder> getAccountHolders() {
 		return meritBankService.getAccountHolders();
 	}
@@ -242,10 +229,11 @@ public class MeritBankController {
 		return meritBankService.getCDAccountsbyId(id);
 	}
 
+// END ADMIN NO NEED TO WORK WE ARE NOT SHOWING ADMIN PAGE
 	
     @PreAuthorize("hasAuthority('AccountHolder')")
 	@ResponseStatus(HttpStatus.CREATED)
-	@GetMapping(value = "/Me")
+	@GetMapping(value = "/Me") //ACCOUNT HOLDER  OVERVIEW
 	@ApiOperation(value = "", authorizations = { @Authorization(value="jwtToken") })
 	public AccountHolder getMyAccountInfo(HttpServletRequest request) {
 		return meritBankService.getMyAccountInfo(request);
@@ -255,7 +243,7 @@ public class MeritBankController {
 	
 	@PreAuthorize("hasAuthority('AccountHolder')")
 	@ResponseStatus(HttpStatus.CREATED)
-	@GetMapping(value = "/Me/CheckingAccount")
+	@GetMapping(value = "/Me/CheckingAccount") //ACCOUNT HOLDER CHECKING ACCOUNT
 	@ApiOperation(value = "", authorizations = { @Authorization(value="jwtToken") })
 	public CheckingAccount getMyCheckingAccounts(HttpServletRequest request) {
 		return meritBankService.getMyCheckingAccounts(request);
@@ -263,7 +251,7 @@ public class MeritBankController {
 	
 	@PreAuthorize("hasAuthority('AccountHolder')")
 	@ResponseStatus(HttpStatus.CREATED)
-	@PostMapping(value = "/Me/CheckingAccount")
+	@PostMapping(value = "/Me/CheckingAccount") // ACCOUNT HOLDER CREATES AND ADDS MONEY
 	@ApiOperation(value = "", authorizations = { @Authorization(value="jwtToken") })
 	public CheckingAccount postMyCheckingAccount(HttpServletRequest request,@Valid @RequestBody CheckingAccount checkingAccount)
 			throws ExceedsCombinedBalanceLimitException, TooManyAccountsException {
@@ -273,7 +261,7 @@ public class MeritBankController {
 
 	@PreAuthorize("hasAuthority('AccountHolder')")
 	@ResponseStatus(HttpStatus.CREATED)
-	@PostMapping(value = "/Me/SavingsAccounts")
+	@PostMapping(value = "/Me/SavingsAccounts") 
 	@ApiOperation(value = "", authorizations = { @Authorization(value="jwtToken") })
 	public SavingsAccount postMySavingsAccounts(HttpServletRequest request, @Valid @RequestBody SavingsAccount savingsAccount) 
 			throws ExceedsCombinedBalanceLimitException, TooManyAccountsException{
@@ -653,7 +641,7 @@ public class MeritBankController {
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping(value = "/Me/Transfer")
 	@ApiOperation(value = "", authorizations = { @Authorization(value="jwtToken") })
-	public List<BankAccount> postMyDBACheckingTransfer(HttpServletRequest request
+	public AccountHolder postMyDBACheckingTransfer(HttpServletRequest request
 			,@Valid @RequestBody TransferTransaction transfer)
 			throws ExceedsCombinedBalanceLimitException, NegativeBalanceException, TransactionFailureException {
 		return meritBankService.postMyTransfer(request, transfer);
@@ -666,6 +654,13 @@ public class MeritBankController {
 	@ApiOperation(value = "", authorizations = { @Authorization(value="jwtToken") })
 	public List<Transaction> getMyTransfer() {
 		return meritBankService.getMyWithdrawl("DBACheckingAccount");
+	}
+	
+	@RequestMapping(value = "/Me/Delete/{id}", method = RequestMethod.DELETE)//AUTHENTICATE LOGIN
+	public List<BankAccount> deleteAccountByID(HttpServletRequest request, @PathVariable Integer id) {
+
+		return meritBankService.deleteAccountByID(request, id);
+
 	}
 	
 }
