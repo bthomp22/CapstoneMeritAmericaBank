@@ -38,12 +38,14 @@ public class TransferTransaction extends Transaction{
 			throw new ExceedsCombinedBalanceLimitException("WARNING! Your amount has exceeded the acceptable limit");
 		}
 		else {
-			//System.out.println("TRANSACTION AMOUNT:");
+			//System.out.println("TRANSACTION AMOUNT:");E
 			type = "Transfer";
 			sourceAccount.withdraw(amount);
-			if(sourceAccount.typeOfAccount.contains("IRA"))
+			if(sourceAccount.typeOfAccount.contains("IRA")) {
 				amount = amount - (20 * amount) / 100;
-			targetAccount.deposit(amount);
+				targetAccount.deposit(amount);
+			}
+				
 		}
 	}
 
