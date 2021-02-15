@@ -42,8 +42,7 @@ public class TransferTransaction extends Transaction{
 			type = "Transfer";
 			sourceAccount.withdraw(amount);
 			if(sourceAccount.typeOfAccount.contains("IRA")) {
-				amount = amount - (20 * amount) / 100;
-				
+				amount = amount - (20 * amount) / 100;				
 			}
 			targetAccount.deposit(amount);
 				
